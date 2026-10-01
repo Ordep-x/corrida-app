@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0F6E56">
+<title>Corrida 20km</title>
+<link rel="manifest" href="./manifest.json">
+<style>
+:root{
+  --g:#1D9E75;--gd:#0F6E56;--gl:#E1F5EE;--gll:#F2FBF7;
+  --b:#185FA5;--bl:#E6F1FB;
+  --a:#BA7517;--al:#FAEEDA;
+  --r:#A32D2D;--rl:#FCEBEB;
+  --ink:#1A1A1A;--muted:#6B7280;--border:#E5E7EB;
+  --bg:#F7F7F5;--card:#FFFFFF;
+  --nav-h:60px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6}
+.hero{background:linear-gradient(150deg,#0a5a45 0%,#0F6E56 40%,#1D9E75 100%);color:#fff;padding:env(safe-area-inset-top,16px) 0 0}
+.hero-inner{padding:1.5rem 1.25rem 1.25rem}
+.hero-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:6px}
+.hero-title{font-size:1.75rem;font-weight:700;line-height:1.2;margin-bottom:1rem}
+.hero-title span{opacity:.8;font-weight:300}
+.hero-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:1rem}
+.hstat{background:rgba(255,255,255,.12);border-radius:10px;padding:8px 4px;text-align:center}
+.hstat-val{font-size:1.1rem;font-weight:700;display:block}
+.hstat-lbl{font-size:10px;opacity:.75;display:block;margin-top:1px}
+.hero-warn{background:rgba(0,0,0,.2);border-left:3px solid rgba(255,255,255,.5);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;line-height:1.6;opacity:.9}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;align-items:stretch;height:calc(var(--nav-h) + env(safe-area-inset-bottom,0));padding-bottom:env(safe-area-inset-bottom,0);z-index:100;box-shadow:0 -2px 12px rgba(0,0,0,.08)}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;padding:6px 4px;color:var(--muted);transition:color .15s;font-family:inherit}
+.bnav-btn.on{color:var(--g)}
+.bnav-icon{font-size:22px;line-height:1}
+.bnav-lbl{font-size:10px;font-weight:500}
+.content{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0) + 16px)}
+.page{display:none}.page.on{display:block}
+.section{padding:1.25rem}.section+.section{padding-top:0}
+.sec-title{font-size:18px;font-weight:700;margin-bottom:4px;color:var(--ink)}
+.sec-sub{font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;margin-bottom:10px}
+.pill{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;margin:2px 3px 2px 0}
+.pg{background:var(--gl);color:var(--gd)}.pb{background:var(--bl);color:var(--b)}.pa{background:var(--al);color:var(--a)}.pr{background:var(--rl);color:var(--r)}
+.info-box{background:var(--gl);border-left:3px solid var(--g);border-radius:0 10px 10px 0;padding:10px 13px;margin-bottom:1rem;font-size:13px;color:var(--gd);line-height:1.6}
+.warn-box{background:var(--al);border-left:3px solid var(--a);border-radius:0 10px 10px 0;padding:10px 13px;margin-bottom:1rem;font-size:13px;color:#633806;line-height:1.6}
+.danger-box{background:var(--rl);border-left:3px solid var(--r);border-radius:0 10px 10px 0;padding:10px 13px;margin-bottom:1rem;font-size:13px;color:var(--r);line-height:1.6}
+.phase{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem}
+.phase-head{padding:.75rem 1rem;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.phase-head.base{background:var(--gll)}.phase-head.build{background:#EEF4FC}.phase-head.peak{background:#FEF9EE}
+.phase-head-title{font-size:13px;font-weight:600;color:var(--ink);flex:1}
+.phase-head-dur{font-size:11px;color:var(--muted)}
+.week-item{border-bottom:1px solid var(--border)}.week-item:last-child{border-bottom:none}
+.week-toggle{width:100%;background:none;border:none;padding:.75rem 1rem;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left;font-family:inherit}
+.week-toggle.recov{background:var(--bg)}
+.week-num{font-size:12px;font-weight:600;color:var(--muted);width:58px;flex-shrink:0}
+.week-preview{flex:1;font-size:13px;color:var(--ink)}
+.week-chevron{font-size:14px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.week-chevron.open{transform:rotate(180deg)}
+.week-detail{display:none;padding:.5rem 1rem .85rem;background:var(--bg)}.week-detail.open{display:block}
+.sess{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+.sess-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.sess-dot.g{background:var(--g)}.sess-dot.b{background:var(--b)}.sess-dot.a{background:var(--a)}.sess-dot.gray{background:var(--border)}
+.sess-km{font-size:14px;font-weight:600;color:var(--ink)}
+.sess-pace{font-size:12px;color:var(--muted);line-height:1.5}
+.sess-fartlek{font-size:12px;color:var(--a);background:var(--al);border-radius:6px;padding:5px 9px;margin-top:4px;line-height:1.5}
+.tl{display:flex;flex-direction:column}
+.tl-row{display:flex}
+.tl-left{width:65px;flex-shrink:0;text-align:right;padding-right:10px;padding-top:2px}
+.tl-time{font-size:11px;font-weight:600;color:var(--muted)}
+.tl-mid{display:flex;flex-direction:column;align-items:center;width:18px;flex-shrink:0}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.tl-line{width:2px;background:var(--border);flex:1;min-height:14px;margin:3px 0}
+.tl-right{flex:1;padding-bottom:16px;padding-left:4px}
+.tl-name{font-size:13px;font-weight:600;color:var(--ink)}
+.tl-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-top:2px}
+.ex-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;margin-bottom:10px}
+.ex-num{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-bottom:7px}
+.ex-num.g{background:var(--gl);color:var(--gd)}.ex-num.b{background:var(--bl);color:var(--b)}.ex-num.a{background:var(--al);color:var(--a)}
+.ex-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.ex-target{font-size:11px;color:var(--muted);margin-bottom:8px}
+.ex-body{font-size:13px;color:var(--ink);line-height:1.6}
+.ex-tip{font-size:12px;color:var(--a);background:var(--al);border-radius:7px;padding:7px 10px;margin-top:8px;line-height:1.5}
+.ex-warn{font-size:12px;color:var(--r);background:var(--rl);border-radius:7px;padding:7px 10px;margin-top:8px;line-height:1.5}
+.sched-day{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.85rem 1rem;margin-bottom:8px}
+.sched-day.run{border-color:var(--g)}.sched-day.run-long{border-color:var(--b)}.sched-day.strength{border-color:#9B9DE8}
+.sched-day-name{font-size:13px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.sched-day-dot{width:8px;height:8px;border-radius:50%}
+.sched-item{font-size:13px;color:var(--muted);line-height:1.7;padding-left:14px;position:relative}
+.sched-item::before{content:"";position:absolute;left:2px;top:10px;width:5px;height:5px;border-radius:50%;background:var(--border)}
+.sched-item.g::before{background:var(--g)}.sched-item.b::before{background:var(--b)}.sched-item.s::before{background:#9B9DE8}
+.prog-row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.85rem 1rem;margin-bottom:8px}
+.prog-month{font-size:12px;font-weight:700;margin-bottom:8px}
+.prog-item{font-size:13px;color:var(--muted);line-height:1.6;padding-left:14px;position:relative;margin-bottom:3px}
+.prog-item::before{content:"→";position:absolute;left:0;color:var(--g);font-size:11px;top:2px}
+.prog-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:6px 0 3px}
+.prog-fill{height:100%;border-radius:3px;background:var(--g)}
+.tip-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+.tip-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.tip-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.tip-body{font-size:13px;color:var(--muted);line-height:1.6}
+.stretch-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;margin-bottom:8px}
+.stretch-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.stretch-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.stabs{display:flex;gap:6px;overflow-x:auto;padding:0 1.25rem 1rem;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.stabs::-webkit-scrollbar{display:none}
+.stab{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:12px;font-weight:500;cursor:pointer;color:var(--muted);white-space:nowrap;font-family:inherit}
+.stab.on{background:var(--g);border-color:var(--g);color:#fff}
+.subpage{display:none}.subpage.on{display:block}
+.week-check{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--border)}
+.week-check:last-child{border-bottom:none}
+.week-check-label{font-size:13px;color:var(--ink);padding-right:12px}
+.week-check-box{width:26px;height:26px;border-radius:7px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--card);flex-shrink:0;font-size:14px;transition:all .15s}
+.week-check-box.checked{background:var(--g);border-color:var(--g);color:#fff}
+.timer-wrap{text-align:center;padding:1.5rem 0}
+.timer-display{font-size:3.5rem;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);letter-spacing:-.02em}
+.timer-lbl{font-size:13px;color:var(--muted);margin-bottom:.5rem}
+.timer-phase{font-size:14px;font-weight:600;color:var(--g);margin-bottom:1rem}
+.timer-btns{display:flex;gap:10px;justify-content:center}
+.timer-btn{padding:10px 24px;border-radius:30px;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.timer-btn.start{background:var(--g);color:#fff}
+.timer-btn.reset{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+hr{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+
+/* INSTALL BANNER */
+.install-banner{background:var(--gd);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.5}
+.install-banner-btn{margin-left:auto;background:#fff;color:var(--gd);border:none;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit}
+.install-banner.hidden{display:none}
+</style>
+</head>
+<body>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <span>📲 Instala esta app no teu telemóvel para acesso offline</span>
+  <button class="install-banner-btn" id="installBtn" onclick="installApp()">Instalar</button>
+</div>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">Plano de treino personalizado · 5 meses</div>
+    <div class="hero-title">Correr <span>os teus</span><br>primeiros 20 km</div>
+    <div class="hero-stats">
+      <div class="hstat"><span class="hstat-val">20km</span><span class="hstat-lbl">Objetivo</span></div>
+      <div class="hstat"><span class="hstat-val">5m</span><span class="hstat-lbl">Duração</span></div>
+      <div class="hstat"><span class="hstat-val">2×</span><span class="hstat-lbl">Corrida</span></div>
+      <div class="hstat"><span class="hstat-val">3×</span><span class="hstat-lbl">Força</span></div>
+      <div class="hstat"><span class="hstat-val">~7'</span><span class="hstat-lbl">Pace base</span></div>
+    </div>
+    <div class="hero-warn">⚠️ Joelho fraco — nunca aumentes distância e intensidade na mesma semana. Para imediatamente se sentires dor.</div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- PLANO -->
+  <div id="p-plano" class="page on">
+    <div class="stabs" id="stabs-plano">
+      <button class="stab on" onclick="showSub('plano','f1',this)">Fase 1 — Base</button>
+      <button class="stab" onclick="showSub('plano','f2',this)">Fase 2 — Construção</button>
+      <button class="stab" onclick="showSub('plano','f3',this)">Fase 3 — Peak</button>
+      <button class="stab" onclick="showSub('plano','f4',this)">Fase 4 — 20km 🎯</button>
+    </div>
+    <div class="section" style="padding-top:0">
+      <div class="warn-box">📏 <strong>Regra dos 10%:</strong> nunca aumentes o volume semanal mais de 10% por semana. Semanas ♻ = baixa 30% — obrigatórias.</div>
+
+      <div id="sp-plano-f1" class="subpage on">
+        <div class="phase">
+          <div class="phase-head base"><span class="pill pg">Fase 1</span><span class="phase-head-title">Base e consistência</span><span class="phase-head-dur">Meses 1–2</span></div>
+          <div class="info-box" style="margin:10px;border-radius:8px">Sem fartlek — cria hábito, adapta o joelho, constrói base aeróbica. Corre devagar mesmo que pareça fácil de mais.</div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 1</span><span class="week-preview">5 km + 5 km · pace suave</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot g"></div><div><div class="sess-km">Sessão A — 5 km</div><div class="sess-pace">Pace suave ~7'30" · aquecimento 12 min obrigatório</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 5 km</div><div class="sess-pace">Pace suave ~7'30" · pelo menos 2 dias de intervalo</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 2</span><span class="week-preview">5 km + 6 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot g"></div><div><div class="sess-km">Sessão A — 5 km</div><div class="sess-pace">Pace suave</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 6 km</div><div class="sess-pace">Pace suave ~7'30" · primeiro aumento de distância</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 3</span><span class="week-preview">5 km + 7 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot g"></div><div><div class="sess-km">Sessão A — 5 km</div><div class="sess-pace">Pace fácil</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 7 km</div><div class="sess-pace">Pace suave · se o joelho reclamar, para em 6 km</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle recov" onclick="toggleWeek(this)"><span class="week-num">Sem. 4 ♻</span><span class="week-preview">5 km + 5 km · recuperação</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="warn-box" style="margin-bottom:10px">Semana de recuperação — NÃO a saltes.</div><div class="sess"><div class="sess-dot gray"></div><div><div class="sess-km">Sessão A — 5 km</div><div class="sess-pace">Pace muito suave</div></div></div><div class="sess"><div class="sess-dot gray"></div><div><div class="sess-km">Sessão B — 5 km</div><div class="sess-pace">Pace suave · sem objetivos</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 5</span><span class="week-preview">6 km + 8 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot g"></div><div><div class="sess-km">Sessão A — 6 km</div><div class="sess-pace">Pace ~7'15"</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 8 km</div><div class="sess-pace">Pace suave ~7'30"</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 6</span><span class="week-preview">6 km + 9 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot g"></div><div><div class="sess-km">Sessão A — 6 km</div><div class="sess-pace">Pace ~7'15"</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 9 km</div><div class="sess-pace">Pace suave</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 7</span><span class="week-preview">6 km + 10 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot g"></div><div><div class="sess-km">Sessão A — 6 km</div><div class="sess-pace">Pace ~7'10"</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 10 km</div><div class="sess-pace">Pace suave ~7'30" · primeiro 10km 🎉</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle recov" onclick="toggleWeek(this)"><span class="week-num">Sem. 8 ♻</span><span class="week-preview">5 km + 7 km · recuperação</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="warn-box" style="margin-bottom:10px">Essencial antes de entrar no fartlek.</div><div class="sess"><div class="sess-dot gray"></div><div><div class="sess-km">Sessão A — 5 km</div><div class="sess-pace">Pace muito suave</div></div></div><div class="sess"><div class="sess-dot gray"></div><div><div class="sess-km">Sessão B — 7 km</div><div class="sess-pace">Pace suave</div></div></div></div></div>
+        </div>
+      </div>
+
+      <div id="sp-plano-f2" class="subpage">
+        <div class="phase">
+          <div class="phase-head build"><span class="pill pb">Fase 2</span><span class="phase-head-title">Construção + fartlek introdutório</span><span class="phase-head-dur">Mês 3</span></div>
+          <div class="info-box" style="margin:10px;border-radius:8px">🎯 Fartlek entra agora — <strong>só nas sessões curtas</strong>. Longas sempre pace suave.</div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 9</span><span class="week-preview">7 km c/ fartlek + 11 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot a"></div><div><div class="sess-km">Sessão A — 7 km com fartlek</div><div class="sess-pace">1 km suave, depois 4× [1 min rápido + 2 min suave], termina suave</div><div class="sess-fartlek">🔥 "Rápido" = ~6'00"–6'15"/km · consegues dizer uma frase com esforço</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 11 km</div><div class="sess-pace">Pace suave ~7'30" · sem fartlek</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 10</span><span class="week-preview">7 km c/ fartlek + 12 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot a"></div><div><div class="sess-km">Sessão A — 7 km com fartlek</div><div class="sess-pace">5× [1 min rápido + 2 min suave]</div><div class="sess-fartlek">🔥 Se sentires tonturas, reduz para 4× e continua suave</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 12 km</div><div class="sess-pace">Pace suave</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 11</span><span class="week-preview">8 km c/ fartlek + 13 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot a"></div><div><div class="sess-km">Sessão A — 8 km com fartlek</div><div class="sess-pace">5× [1 min 30 seg rápido + 2 min suave]</div><div class="sess-fartlek">🔥 A respiração fica mais ofegante nos blocos — é normal</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 13 km</div><div class="sess-pace">Pace suave ~7'30"</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle recov" onclick="toggleWeek(this)"><span class="week-num">Sem. 12 ♻</span><span class="week-preview">6 km + 9 km · recuperação</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="warn-box" style="margin-bottom:10px">Sem fartlek esta semana.</div><div class="sess"><div class="sess-dot gray"></div><div><div class="sess-km">Sessão A — 6 km</div><div class="sess-pace">Pace muito suave</div></div></div><div class="sess"><div class="sess-dot gray"></div><div><div class="sess-km">Sessão B — 9 km</div><div class="sess-pace">Pace suave</div></div></div></div></div>
+        </div>
+      </div>
+
+      <div id="sp-plano-f3" class="subpage">
+        <div class="phase">
+          <div class="phase-head peak"><span class="pill pa">Fase 3</span><span class="phase-head-title">Aproximação ao objetivo</span><span class="phase-head-dur">Mês 4</span></div>
+          <div class="info-box" style="margin:10px;border-radius:8px">Fartlek fica mais longo. Joelho já mais forte. Qualquer dor articular → volta à fase anterior 1 semana.</div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 13</span><span class="week-preview">8 km c/ fartlek + 14 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot a"></div><div><div class="sess-km">Sessão A — 8 km com fartlek</div><div class="sess-pace">5× [2 min rápido + 2 min suave]</div><div class="sess-fartlek">🔥 "Rápido" pode chegar a ~5'50"/km</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 14 km</div><div class="sess-pace">Pace suave · divide em etapas mentais de 5 km</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 14</span><span class="week-preview">8 km c/ fartlek + 15 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot a"></div><div><div class="sess-km">Sessão A — 8 km com fartlek</div><div class="sess-pace">6× [2 min rápido + 90 seg suave] · recuperação mais curta</div><div class="sess-fartlek">🔥 Recuperação mais curta = maior estímulo cardiovascular</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 15 km</div><div class="sess-pace">Pace ~7'15"</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 15</span><span class="week-preview">9 km c/ fartlek + 16 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot a"></div><div><div class="sess-km">Sessão A — 9 km com fartlek</div><div class="sess-pace">6× [2 min rápido + 90 seg suave]</div><div class="sess-fartlek">🔥 Semana mais exigente do plano — descansa bem</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 16 km</div><div class="sess-pace">Pace suave · divide em 4 × 4 km mentalmente</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle recov" onclick="toggleWeek(this)"><span class="week-num">Sem. 16 ♻</span><span class="week-preview">7 km + 10 km · recuperação</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="warn-box" style="margin-bottom:10px">O mês 5 é exigente — chega fresco.</div><div class="sess"><div class="sess-dot gray"></div><div><div class="sess-km">Sessão A — 7 km</div><div class="sess-pace">Sem fartlek · pace suave</div></div></div><div class="sess"><div class="sess-dot gray"></div><div><div class="sess-km">Sessão B — 10 km</div><div class="sess-pace">Pace suave</div></div></div></div></div>
+        </div>
+      </div>
+
+      <div id="sp-plano-f4" class="subpage">
+        <div class="phase">
+          <div class="phase-head peak"><span class="pill pa">Fase 4</span><span class="phase-head-title">Peak — chegada aos 20 km 🎯</span><span class="phase-head-dur">Mês 5</span></div>
+          <div class="info-box" style="margin:10px;border-radius:8px">Não aumentes carga de fortalecimento. Dorme bem. Hidrata. O objetivo está mesmo próximo.</div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 17</span><span class="week-preview">9 km c/ fartlek + 17 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot a"></div><div><div class="sess-km">Sessão A — 9 km com fartlek</div><div class="sess-pace">6× [2 min 30 seg rápido + 90 seg suave]</div><div class="sess-fartlek">🔥 A caixa já é claramente diferente do início</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 17 km</div><div class="sess-pace">Pace suave · podes caminhar 1–2 min após os 13 km</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)"><span class="week-num">Sem. 18</span><span class="week-preview">9 km c/ fartlek + 18 km</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="sess"><div class="sess-dot a"></div><div><div class="sess-km">Sessão A — 9 km com fartlek</div><div class="sess-pace">5× [3 min rápido + 2 min suave]</div><div class="sess-fartlek">🔥 3 minutos a ritmo elevado — melhor estímulo cardiovascular do plano</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 18 km</div><div class="sess-pace">Pace ~7'15" · só faltam 2 km!</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle" onclick="toggleWeek(this)" style="border-left:3px solid var(--g)"><span class="week-num" style="color:var(--g)">Sem. 19 🎯</span><span class="week-preview" style="font-weight:700;color:var(--g)">10 km + 20 km — OBJETIVO!</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="info-box" style="margin-bottom:10px">Sem fartlek nos 20 km. O objetivo é TERMINAR. Podes caminhar — é estratégia válida.</div><div class="sess"><div class="sess-dot g"></div><div><div class="sess-km">Sessão A — 10 km</div><div class="sess-pace">Pace ~6'40" · 3 dias antes dos 20 km</div></div></div><div class="sess"><div class="sess-dot b"></div><div><div class="sess-km">Sessão B — 20 km 🏁</div><div class="sess-pace">Pace ~7'30" · aquece 12 min · divide em 4 × 5 km · és capaz!</div></div></div></div></div>
+          <div class="week-item"><button class="week-toggle recov" onclick="toggleWeek(this)"><span class="week-num">Sem. 20 🎉</span><span class="week-preview">6 km + 10 km · celebração</span><span class="week-chevron">▾</span></button><div class="week-detail"><div class="info-box" style="margin-bottom:10px">Objetivo concluído! Corre pelo prazer.</div><div class="sess"><div class="sess-dot gray"></div><div><div class="sess-km">Sessão A — 6 km</div><div class="sess-pace">A teu ritmo · sem relógio</div></div></div><div class="sess"><div class="sess-dot gray"></div><div><div class="sess-km">Sessão B — 10 km</div><div class="sess-pace">Já parece curto, pois não? 😄</div></div></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AQUECIMENTO -->
+  <div id="p-aquec" class="page">
+    <div class="section">
+      <div class="sec-title">Aquecimento</div>
+      <div class="sec-sub">12 minutos obrigatórios antes de cada corrida</div>
+      <div class="tl">
+        <div class="tl-row"><div class="tl-left"><span class="tl-time">0–3 min</span></div><div class="tl-mid"><div class="tl-dot" style="background:var(--border)"></div><div class="tl-line"></div></div><div class="tl-right"><div class="tl-name">Caminhada ativa</div><div class="tl-desc">Passo vivo, postura alta, braços a balançar. Lubrifica a articulação do joelho e ativa a circulação.</div><span class="pill pb">sem impacto</span></div></div>
+        <div class="tl-row"><div class="tl-left"><span class="tl-time">3–5 min</span></div><div class="tl-mid"><div class="tl-dot" style="background:var(--b)"></div><div class="tl-line"></div></div><div class="tl-right"><div class="tl-name">Leg swings — pêndulo</div><div class="tl-desc">Apoiado na parede. 10× cada perna frente/trás, depois 10× lateral. Movimento controlado — não atirar com força.</div><span class="pill pb">mobilidade da anca</span></div></div>
+        <div class="tl-row"><div class="tl-left"><span class="tl-time">5–7 min</span></div><div class="tl-mid"><div class="tl-dot" style="background:var(--g)"></div><div class="tl-line"></div></div><div class="tl-right"><div class="tl-name">Mini agachamentos + elevação calcanhar</div><div class="tl-desc">Agachamento parcial até 30° — 10 rep lentas. Depois 15 elevações de calcanhar (dois pés) — 3 seg a subir, 3 a descer.</div><span class="pill pg">quadricípite + gémeos</span></div></div>
+        <div class="tl-row"><div class="tl-left"><span class="tl-time">7–9 min</span></div><div class="tl-mid"><div class="tl-dot" style="background:var(--g)"></div><div class="tl-line"></div></div><div class="tl-right"><div class="tl-name">Clamshells + abdução lateral em pé</div><div class="tl-desc">Deitado de lado, joelhos a 90°, abre perna de cima 12× cada lado. Depois de pé, 10 elevações laterais suaves. O exercício mais importante desta rotina.</div><span class="pill pg">glúteo médio — crítico!</span></div></div>
+        <div class="tl-row"><div class="tl-left"><span class="tl-time">9–11 min</span></div><div class="tl-mid"><div class="tl-dot" style="background:var(--a)"></div><div class="tl-line"></div></div><div class="tl-right"><div class="tl-name">Marcha alta + skipping suave</div><div class="tl-desc">Joelhos à altura da anca, 20 metros ida e volta. Eleva a frequência cardíaca e ativa toda a cadeia cinética.</div><span class="pill pa">transição para corrida</span></div></div>
+        <div class="tl-row"><div class="tl-left"><span class="tl-time">11–12 min</span></div><div class="tl-mid"><div class="tl-dot" style="background:var(--g)"></div></div><div class="tl-right" style="padding-bottom:0"><div class="tl-name">Trote lento de arranque</div><div class="tl-desc">Primeiro minuto sempre mais lento que o teu pace habitual. Nunca arrancar rápido.</div><span class="pill pg">pronto para correr ✓</span></div></div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <div class="timer-wrap">
+          <div class="timer-display" id="timer-disp">12:00</div>
+          <div class="timer-lbl" id="timer-lbl">Toca em Iniciar quando começares</div>
+          <div class="timer-phase" id="timer-phase">Caminhada ativa</div>
+          <div class="timer-btns">
+            <button class="timer-btn start" onclick="timerToggle()" id="timer-start-btn">Iniciar</button>
+            <button class="timer-btn reset" onclick="timerReset()">Reiniciar</button>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="sec-title" style="font-size:16px;margin-bottom:.5rem">Alongamentos pós-corrida — 8 min</div>
+      <div class="stretch-card"><div class="stretch-name">Quadricípite em pé — 30 seg × 2 cada lado</div><div class="stretch-desc">Apoiado na parede, agarra o pé e puxa o calcanhar ao glúteo. Nunca forçar se sentires desconforto no joelho.</div></div>
+      <div class="stretch-card"><div class="stretch-name">Isquiotibiais sentado — 30 seg × 2 cada lado</div><div class="stretch-desc">No chão, perna estendida. Inclina o tronco à frente com as costas direitas. Respira lentamente.</div></div>
+      <div class="stretch-card"><div class="stretch-name">Piriforme / figura 4 — 30 seg × 2 cada lado</div><div class="stretch-desc">Deitado de costas, cruza o tornozelo sobre o joelho oposto, puxa para o peito. Alivia glúteo, anca e banda IT.</div></div>
+      <div class="stretch-card"><div class="stretch-name">Banda IT + gémeos — 20–30 seg cada</div><div class="stretch-desc">Banda IT: perna cruzada atrás, inclinação lateral. Gémeos: pé na parede com joelho recto. Previne síndrome da banda IT.</div></div>
+    </div>
+  </div>
+
+  <!-- FORÇA -->
+  <div id="p-forca" class="page">
+    <div class="section">
+      <div class="sec-title">Fortalecimento</div>
+      <div class="sec-sub">3× por semana · dias sem corrida · 30–40 minutos</div>
+      <div class="info-box">O joelho fraco é quase sempre fraqueza do <strong>quadricípite</strong>, <strong>glúteo médio</strong> ou <strong>core</strong>. Estes 6 exercícios atacam essas 3 zonas sem impacto.</div>
+      <div class="ex-card"><div class="ex-num g">1</div><div class="ex-title">Agachamento de cadeira (Wall Squat)</div><div class="ex-target">Quadricípite — motor principal do joelho</div><div><span class="pill pg">3 séries × 12 rep</span><span class="pill pb">sem impacto</span></div><div class="ex-body" style="margin-top:8px">Costas na parede, pés a 30–40 cm. Desce até 90° (ou onde conseguires sem dor), mantém 3 seg, sobe em 3 seg. Joelhos alinhados com os 2.º dedos dos pés — nunca deixar cair para dentro.</div><div class="ex-tip">⚠️ Se sentires dor no joelho, reduz para 45° de amplitude.</div></div>
+      <div class="ex-card"><div class="ex-num g">2</div><div class="ex-title">Terminal Knee Extension com elástico</div><div class="ex-target">Quadricípite — últimos 30° de extensão</div><div><span class="pill pg">3 séries × 15 rep</span><span class="pill pb">sem impacto</span></div><div class="ex-body" style="margin-top:8px">Elástico preso à parede ao nível do joelho. Passo atrás para criar tensão. Dobra o joelho levemente, estende completamente, aperta o quadricípite 2 seg. Desce em 3 seg.</div><div class="ex-tip">💡 Elástico amarelo no mês 1 · médio no mês 2 · forte no mês 3+</div></div>
+      <div class="ex-card"><div class="ex-num b">3</div><div class="ex-title">Abdução lateral + monster walk</div><div class="ex-target">Glúteo médio — estabilizador principal do joelho</div><div><span class="pill pb">3 séries × 15 rep</span><span class="pill pb">bilateral</span></div><div class="ex-body" style="margin-top:8px"><strong>Meses 1–2:</strong> deitado de lado, perna de cima sobe a 45° em 3 seg, desce em 3 seg.<br><strong>Mês 3+:</strong> de pé com elástico no tornozelo — passos laterais (monster walk) 10× ida e volta.</div></div>
+      <div class="ex-card"><div class="ex-num b">4</div><div class="ex-title">Elevação de calcanhar excêntrica unilateral</div><div class="ex-target">Gémeos e tendão de Aquiles — amortecimento</div><div><span class="pill pb">3 séries × 15 rep</span><span class="pill pb">excêntrico</span></div><div class="ex-body" style="margin-top:8px">Sobe nos dois pés, depois transfere para uma perna só e desce lentamente em 3–4 seg. Gémeos fortes reduzem o impacto no joelho a cada passada.</div></div>
+      <div class="ex-card"><div class="ex-num a">5</div><div class="ex-title">Dead Bug — core anti-rotação</div><div class="ex-target">Core e estabilidade pélvica</div><div><span class="pill pa">3 séries × 10 rep alternadas</span><span class="pill pb">sem impacto</span></div><div class="ex-body" style="margin-top:8px">Deitado de costas, braços no ar, joelhos a 90°. Desce braço direito + perna esquerda simultaneamente sem tocar no chão — costas SEMPRE coladas ao solo. Alterna lados.</div></div>
+      <div class="ex-card"><div class="ex-num a">6</div><div class="ex-title">Step-up lateral num degrau</div><div class="ex-target">Glúteo + quadricípite em cadeia fechada</div><div><span class="pill pa">2 séries × 10 rep — mês 2+</span></div><div class="ex-body" style="margin-top:8px">Degrau de 15–20 cm. Sobe lateralmente com o pé de fora, desce em 3 seg lentos. Simula o gesto de corrida.</div><div class="ex-warn">🚫 Não introduzir no mês 1. Se dor ao descer, reduz altura do degrau.</div></div>
+      <div class="danger-box">⛔ <strong>Para imediatamente:</strong> dor aguda · joelho a "travar" · inchaço visível · dor que não melhora a aquecer · dor que altera a tua pisada. Descansa 3–5 dias.</div>
+    </div>
+  </div>
+
+  <!-- SEMANA -->
+  <div id="p-semana" class="page">
+    <div class="stabs" id="stabs-semana">
+      <button class="stab on" onclick="showSub('semana','sched',this)">Horário</button>
+      <button class="stab" onclick="showSub('semana','prog',this)">Progressão</button>
+      <button class="stab" onclick="showSub('semana','check',this)">Checklist</button>
+    </div>
+    <div class="section" style="padding-top:0">
+      <div id="sp-semana-sched" class="subpage on">
+        <div class="sec-sub">Exemplo do mês 2 · adapta os dias mas mantém 1 dia de descanso entre corridas</div>
+        <div class="sched-day strength"><div class="sched-day-name"><div class="sched-day-dot" style="background:#9B9DE8"></div>Segunda</div><div class="sched-item s">Fortalecimento 30 min (ex. 1, 2, 3, 5)</div></div>
+        <div class="sched-day run"><div class="sched-day-name"><div class="sched-day-dot" style="background:var(--g)"></div>Terça — Corrida curta</div><div class="sched-item g">Aquecimento 12 min</div><div class="sched-item g">Corrida 6–8 km (c/ fartlek a partir do mês 3)</div><div class="sched-item g">Alongamentos 8 min</div></div>
+        <div class="sched-day"><div class="sched-day-name"><div class="sched-day-dot" style="background:var(--border)"></div>Quarta — Descanso ativo</div><div class="sched-item">Caminhada suave 20–30 min (opcional)</div></div>
+        <div class="sched-day strength"><div class="sched-day-name"><div class="sched-day-dot" style="background:#9B9DE8"></div>Quinta</div><div class="sched-item s">Fortalecimento 30 min (ex. 1, 3, 4, 6)</div></div>
+        <div class="sched-day"><div class="sched-day-name"><div class="sched-day-dot" style="background:var(--border)"></div>Sexta — Descanso completo</div><div class="sched-item">Gelo no joelho se necessário (10–15 min)</div></div>
+        <div class="sched-day run-long"><div class="sched-day-name"><div class="sched-day-dot" style="background:var(--b)"></div>Sábado — Corrida longa</div><div class="sched-item b">Aquecimento 12 min</div><div class="sched-item b">Corrida longa (sempre pace suave)</div><div class="sched-item b">Alongamentos 8 min</div></div>
+        <div class="sched-day"><div class="sched-day-name"><div class="sched-day-dot" style="background:var(--border)"></div>Domingo — Descanso completo</div><div class="sched-item">Foam roller opcional</div></div>
+        <div class="warn-box" style="margin-top:.5rem">Fortalecimento NUNCA no dia anterior à corrida longa.</div>
+      </div>
+      <div id="sp-semana-prog" class="subpage">
+        <div class="sec-sub">Como evoluis de mês em mês</div>
+        <div class="prog-row"><div class="prog-month"><span class="pill pg">Mês 1</span></div><div class="prog-bar"><div class="prog-fill" style="width:20%"></div></div><div class="prog-item">Exercícios 1, 2, 3 e 5 — 2 séries</div><div class="prog-item">Amplitude reduzida (30–45°)</div><div class="prog-item">Elástico leve · sem fartlek</div></div>
+        <div class="prog-row"><div class="prog-month"><span class="pill pg">Mês 2</span></div><div class="prog-bar"><div class="prog-fill" style="width:40%"></div></div><div class="prog-item">Adicionar exercícios 4 e 6</div><div class="prog-item">3 séries em tudo · elástico médio</div><div class="prog-item">Amplitude até 90° · sem fartlek</div></div>
+        <div class="prog-row"><div class="prog-month"><span class="pill pb">Mês 3</span></div><div class="prog-bar"><div class="prog-fill" style="width:60%"></div></div><div class="prog-item">🎯 Fartlek entra — 4× blocos de 1 min</div><div class="prog-item">Monster walk substitui abdução deitada</div><div class="prog-item">Elástico médio nos ex. 2 e 3</div></div>
+        <div class="prog-row"><div class="prog-month"><span class="pill pa">Mês 4</span></div><div class="prog-bar"><div class="prog-fill" style="width:80%"></div></div><div class="prog-item">Fartlek — blocos de 2 min</div><div class="prog-item">Agachamento unilateral assistido</div><div class="prog-item">Elástico forte · recuperação mais curta</div></div>
+        <div class="prog-row"><div class="prog-month"><span class="pill pa">Mês 5</span></div><div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div><div class="prog-item">Fartlek — blocos de 2:30–3 min</div><div class="prog-item">NÃO aumentar carga de fortalecimento</div><div class="prog-item">Aquecimento 12 min rigoroso nos 20 km</div></div>
+      </div>
+      <div id="sp-semana-check" class="subpage">
+        <div class="sec-sub">Marca o que já fizeste esta semana</div>
+        <div class="card" id="checklist">
+          <div class="week-check"><span class="week-check-label">Corrida curta (aquec. + corrida + alongamentos)</span><div class="week-check-box" onclick="toggleCheck(this)"></div></div>
+          <div class="week-check"><span class="week-check-label">Corrida longa (aquec. + corrida + alongamentos)</span><div class="week-check-box" onclick="toggleCheck(this)"></div></div>
+          <div class="week-check"><span class="week-check-label">Fortalecimento — Sessão 1 (ex. 1, 2, 3, 5)</span><div class="week-check-box" onclick="toggleCheck(this)"></div></div>
+          <div class="week-check"><span class="week-check-label">Fortalecimento — Sessão 2 (ex. 1, 3, 4, 6)</span><div class="week-check-box" onclick="toggleCheck(this)"></div></div>
+          <div class="week-check"><span class="week-check-label">Fortalecimento — Sessão 3 (livre)</span><div class="week-check-box" onclick="toggleCheck(this)"></div></div>
+          <div class="week-check"><span class="week-check-label">Descanso ativo (caminhada)</span><div class="week-check-box" onclick="toggleCheck(this)"></div></div>
+          <div class="week-check"><span class="week-check-label">Hidratação adequada todos os dias</span><div class="week-check-box" onclick="toggleCheck(this)"></div></div>
+        </div>
+        <button class="timer-btn reset" style="width:100%;margin-top:4px" onclick="resetChecklist()">Limpar checklist</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DICAS -->
+  <div id="p-dicas" class="page">
+    <div class="section">
+      <div class="sec-title">Dicas e princípios</div>
+      <div class="sec-sub">O que torna este plano seguro e eficaz</div>
+      <div class="tip-card"><div class="tip-icon">📏</div><div><div class="tip-title">Regra dos 10%</div><div class="tip-body">Nunca aumentes o volume semanal mais de 10% por semana. É o erro mais comum e a principal causa de lesões em corredores iniciantes.</div></div></div>
+      <div class="tip-card"><div class="tip-icon">♻️</div><div><div class="tip-title">Semanas de recuperação</div><div class="tip-body">A cada 3–4 semanas baixa 30% do volume. O corpo adapta-se durante o descanso, não durante o treino. Nunca saltes estas semanas.</div></div></div>
+      <div class="tip-card"><div class="tip-icon">🚶</div><div><div class="tip-title">Correr/caminhar é estratégia</div><div class="tip-body">Nas distâncias longas, alternar corrida e caminhada de forma planeada é inteligente — não é fraqueza. Faz-o antes de estares exausto.</div></div></div>
+      <div class="tip-card"><div class="tip-icon">😤</div><div><div class="tip-title">Respiração e caixa</div><div class="tip-body">A dificuldade em respirar e falar melhora progressivamente com o fartlek. Em 5 meses o teu VO2 máx e limiar anaeróbico vão subir claramente.</div></div></div>
+      <div class="tip-card"><div class="tip-icon">🧊</div><div><div class="tip-title">Gelo pós-corrida</div><div class="tip-body">Se o joelho estiver quente ou inchado após a corrida, 10–15 min de gelo (com pano entre o gelo e a pele).</div></div></div>
+      <div class="tip-card"><div class="tip-icon">👟</div><div><div class="tip-title">Calçado e piso</div><div class="tip-body">Tênis com boa amortecimento. Prefere terra batida ou parque — evita betão. Cadência ~170 passos/min com passos curtos reduz impacto no joelho 20%.</div></div></div>
+      <div class="tip-card"><div class="tip-icon">💧</div><div><div class="tip-title">Hidratação</div><div class="tip-body">Mínimo 2L por dia nos dias de treino. O líquido sinovial que lubrifica o joelho depende de boa hidratação.</div></div></div>
+      <div class="tip-card"><div class="tip-icon">🩺</div><div><div class="tip-title">Fisioterapeuta</div><div class="tip-body">Uma avaliação inicial vale o investimento — identifica desequilíbrios específicos e personaliza os exercícios para o teu joelho.</div></div></div>
+      <div class="danger-box" style="margin-top:1rem">⛔ <strong>Para imediatamente:</strong> dor aguda durante a corrida · joelho a "travar" com dor · inchaço visível · dor que altera a tua pisada · dor que não melhora a aquecer.</div>
+      <div class="info-box">💪 <strong>Mensagem final:</strong> 5 meses são suficientes para chegares aos 20 km em segurança — se respeitares o plano e os sinais do teu corpo. O fortalecimento e o aquecimento são tão importantes como as corridas. Vai a isso!</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="bnav-btn on" onclick="showPage('plano',this)"><span class="bnav-icon">📅</span><span class="bnav-lbl">Plano</span></button>
+  <button class="bnav-btn" onclick="showPage('aquec',this)"><span class="bnav-icon">🔥</span><span class="bnav-lbl">Aquecimento</span></button>
+  <button class="bnav-btn" onclick="showPage('forca',this)"><span class="bnav-icon">💪</span><span class="bnav-lbl">Força</span></button>
+  <button class="bnav-btn" onclick="showPage('semana',this)"><span class="bnav-icon">🗓️</span><span class="bnav-lbl">Semana</span></button>
+  <button class="bnav-btn" onclick="showPage('dicas',this)"><span class="bnav-icon">💡</span><span class="bnav-lbl">Dicas</span></button>
+</nav>
+
+<script>
+// PWA Install
+var deferredPrompt;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.remove('hidden');
+});
+window.addEventListener('appinstalled', function() {
+  document.getElementById('installBanner').classList.add('hidden');
+});
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(r) {
+      deferredPrompt = null;
+      document.getElementById('installBanner').classList.add('hidden');
+    });
+  }
+}
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+
+// NAV
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
+  document.querySelectorAll('.bnav-btn').forEach(function(b){b.classList.remove('on')});
+  document.getElementById('p-'+id).classList.add('on');
+  btn.classList.add('on');
+  window.scrollTo(0,0);
+}
+function showSub(page, sub, btn) {
+  var prefix='sp-'+page+'-';
+  document.querySelectorAll('[id^="'+prefix+'"]').forEach(function(s){s.classList.remove('on')});
+  document.querySelectorAll('#stabs-'+page+' .stab').forEach(function(t){t.classList.remove('on')});
+  document.getElementById(prefix+sub).classList.add('on');
+  btn.classList.add('on');
+}
+function toggleWeek(btn) {
+  var d=btn.nextElementSibling, c=btn.querySelector('.week-chevron'), o=d.classList.contains('open');
+  d.classList.toggle('open',!o); c.classList.toggle('open',!o);
+}
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  el.textContent=el.classList.contains('checked')?'✓':'';
+}
+function resetChecklist() {
+  document.querySelectorAll('.week-check-box').forEach(function(el){el.classList.remove('checked');el.textContent='';});
+}
+
+// TIMER
+var tSec=720,tRun=false,tInt=null;
+var tPhases=[
+  {end:540,label:'Caminhada ativa',color:'#6B7280'},
+  {end:420,label:'Leg swings — pêndulo',color:'#185FA5'},
+  {end:300,label:'Mini agachamentos + calcanhar',color:'#1D9E75'},
+  {end:180,label:'Clamshells + abdução lateral',color:'#1D9E75'},
+  {end:60,label:'Marcha alta + skipping',color:'#BA7517'},
+  {end:0,label:'Trote lento de arranque',color:'#1D9E75'}
+];
+function tFmt(s){var m=Math.floor(s/60),ss=s%60;return(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;}
+function tUpdatePhase(){
+  for(var i=0;i<tPhases.length;i++){
+    if(tSec>tPhases[i].end){
+      document.getElementById('timer-phase').textContent=tPhases[i].label;
+      document.getElementById('timer-phase').style.color=tPhases[i].color;
+      return;
+    }
+  }
+}
+function timerToggle(){
+  if(tSec===0)return;
+  tRun=!tRun;
+  document.getElementById('timer-start-btn').textContent=tRun?'Pausar':'Continuar';
+  if(tRun){
+    tInt=setInterval(function(){
+      if(tSec>0){tSec--;document.getElementById('timer-disp').textContent=tFmt(tSec);tUpdatePhase();}
+      if(tSec===0){clearInterval(tInt);tRun=false;document.getElementById('timer-start-btn').textContent='Iniciar';document.getElementById('timer-phase').textContent='✓ Aquecimento completo!';}
+    },1000);
+  } else {clearInterval(tInt);}
+}
+function timerReset(){
+  clearInterval(tInt);tRun=false;tSec=720;
+  document.getElementById('timer-disp').textContent='12:00';
+  document.getElementById('timer-lbl').textContent='Toca em Iniciar quando começares';
+  document.getElementById('timer-phase').textContent='Caminhada ativa';
+  document.getElementById('timer-phase').style.color='#1D9E75';
+  document.getElementById('timer-start-btn').textContent='Iniciar';
+}
+// Hide install banner if already installed
+if(window.matchMedia('(display-mode: standalone)').matches){
+  document.getElementById('installBanner').classList.add('hidden');
+}
+</script>
+</body>
+</html>
